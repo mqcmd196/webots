@@ -30,9 +30,9 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.13269529311421444 0.9647788825670056 0.22714239352902124 4.248535326463899
-  position -8.8279286046337 2.953706650694342 -1.1405434360218036
-  follow "a1"
+  fieldOfView 0.785389
+  orientation 0.9988618078650572 -0.03159666455164822 0.0357314928006086 5.851549673308101
+  position 0.09554937198497548 3.40505755273027 9.735656522847073
 }
 TexturedBackground {
 }
@@ -173,4 +173,34 @@ DEF WATER Fluid {
   ]
   boundingObject USE WATER_BOX
   locked TRUE
+}
+DEF BALL Solid {
+  rotation -0.4970021779677164 -0.14910065339031492 -0.8548437461044722 2.74
+  children [
+    DEF S Shape {
+      appearance GlossyPaint {
+        baseColor 1 0 0
+      }
+      geometry Sphere {
+        radius 0.12
+      }
+    }
+  ]
+  name "ball"
+  immersionProperties [
+    DEF WATER_PROPERTIES ImmersionProperties {
+      fluidName "fluid"
+      dragForceCoefficients 0.1 0 0
+      dragTorqueCoefficients 0.001 0 0
+      viscousResistanceTorqueCoefficient 0.005
+    }
+  ]
+  boundingObject USE S
+  physics Physics {
+    density 500
+    damping Damping {
+      linear 0.5
+      angular 0.5
+    }
+  }
 }
