@@ -31,8 +31,8 @@ WorldInfo {
 }
 Viewpoint {
   fieldOfView 0.785389
-  orientation 0.9988618078650572 -0.03159666455164822 0.0357314928006086 5.851549673308101
-  position 0.09554937198497548 3.40505755273027 9.735656522847073
+  orientation 0.007663042464193011 -0.930278405743071 -0.36677427061930346 3.131815375132939
+  position -0.26948217731614266 10.02782005662607 -13.920073766339392
 }
 TexturedBackground {
 }
@@ -43,10 +43,29 @@ DEF a1 Salamander {
   rotation 0 1 0 1.5708
   name "a1"
 }
+DEF a2 Salamander {
+  translation 3.4 0.294 2
+  rotation 0 1 0 1.5708
+  name "a2"
+}
+DEF a3 Salamander {
+  translation 3.4 0.294 -2
+  rotation 0 1 0 1.57
+}
 DEF b1 Salamander {
   translation -3.4 0.294 0
   rotation 0 -1 0 1.57
   name "b1"
+}
+DEF b2 Salamander {
+  translation -3.4 0.294 2
+  rotation 0 -1 0 1.57
+  name "b2"
+}
+DEF b3 Salamander {
+  translation -3.4 0.294 -2
+  rotation 0 -1 0 1.57
+  name "b3"
 }
 DEF FLOOR Solid {
   children [
@@ -203,4 +222,16 @@ DEF BALL Solid {
       angular 0.5
     }
   }
+}
+DEF AGoal RobotstadiumGoal {
+  translation 5.3 0.25 0
+  rotation 0 0 1 0.2
+  name "AGoal"
+  frameColor 0 1 0
+}
+DEF BGoal RobotstadiumGoal {
+  translation -5.3 0.25 0
+  rotation 0.09950371902099893 0.9950371902099893 0 3.1415
+  name "BGoal"
+  frameColor 0 0 1
 }
