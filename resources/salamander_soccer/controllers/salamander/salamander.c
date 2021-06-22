@@ -52,6 +52,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <webots/keyboard.h>
 #include <webots/motor.h>
 #include <webots/robot.h>
+#include <webots/supervisor.h>
 
 /* for array indexing */
 #define X 0
@@ -73,8 +74,8 @@ static double ampl = 1.0;
 static double phase = 0.0; /* current locomotion phase */
 
 /* control types */
-enum { AUTO, KEYBOARD, STOP };
-static int control = AUTO;
+enum { AUTO, KEYBOARD, STOP, SOCCER };
+static int control = SOCCER;
 
 /* locomotion types */
 enum {
@@ -129,6 +130,9 @@ void read_keyboard_command() {
         control = AUTO;
         printf("Auto control ...\n");
         break;
+      case 'S':
+        control = SOCCER;
+        printf("Play soccer ...\n");
       case ' ':
         control = STOP;
         printf("Stopped.\n");
@@ -139,9 +143,12 @@ void read_keyboard_command() {
 }
 
 int main() {
-  const double FREQUENCY = 1.4; /* locomotion frequency [Hz] */
-  const double WALK_AMPL = 0.6; /* radians */
-  const double SWIM_AMPL = 1.0; /* radians */
+  // const double FREQUENCY = 1.4; /* locomotion frequency [Hz] */
+  // const double WALK_AMPL = 0.6; /* radians */
+  // const double SWIM_AMPL = 1.0; /* radians */
+  const double FREQUENCY = 1.4;
+  const double WALK_AMPL = 0.6;
+  const double SWIM_AMPL = 0.6;
 
   /* body and leg motors */
   WbDeviceTag motor[NUM_MOTORS];
@@ -174,6 +181,11 @@ int main() {
   /* get and enable gps device */
   gps = wb_robot_get_device("gps");
   wb_gps_enable(gps, CONTROL_STEP);
+  
+  /* get ball position */
+  // use supervisor
+  // WbNodeRef ball_node = wb_supervisor_node_get_from_def("BALL");
+  // WbFieldRef ball_trans_field = wb_supervisor_node_get_field(ball_node, "translation");
 
   /* enable keyboard */
   wb_keyboard_enable(CONTROL_STEP);
@@ -186,6 +198,8 @@ int main() {
   printf(" 'Up/Down' --> INCREASE/DECREASE motion amplitude\n");
   printf(" 'Spacebar' --> STOP the robot motors\n");
   printf(" 'A' --> return to AUTO steering mode\n");
+  printf(" 'S' --> playing SOCCER mode\n");
+
 
   /* control loop: sense-compute-act */
   while (wb_robot_step(CONTROL_STEP) != -1) {
@@ -199,8 +213,14 @@ int main() {
       /* change direction according to sensor reading */
       spine_offset = (right_val - left_val);
     }
-
-    if (control == AUTO || control == KEYBOARD) {
+    else if (control == SOCCER) {
+      // double ball_x = wb_supervisor_field_get_sf_vec3f(ball_trans_field)[X];
+      // double ball_z = wb_supervisor_field_get_sf_vec3f(ball_trans_field)[Z];
+      double left_val = wb_distance_sensor_get_value(ds_left);
+      double right_val = wb_distance_sensor_get_value(ds_right);
+      spine_offset = (right_val + left_val) * 0.001;
+    }
+    if (control == AUTO || control == KEYBOARD || control == SOCCER) {
       /* increase phase according to elapsed time */
       phase -= (double)CONTROL_STEP / 1000.0 * FREQUENCY * 2.0 * M_PI;
 

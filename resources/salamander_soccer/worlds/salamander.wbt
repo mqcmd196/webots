@@ -31,8 +31,8 @@ WorldInfo {
 }
 Viewpoint {
   fieldOfView 0.785389
-  orientation 0.007663042464193011 -0.930278405743071 -0.36677427061930346 3.131815375132939
-  position -0.26948217731614266 10.02782005662607 -13.920073766339392
+  orientation -5.5373870785921803e-05 -0.8455712253908684 -0.5338626225207379 3.1079855549285336
+  position -0.3085051080526209 14.216961409659094 -6.922491666573697
 }
 TexturedBackground {
 }
@@ -42,30 +42,36 @@ DEF a1 Salamander {
   translation 3.4 0.29422 0
   rotation 0 1 0 1.5708
   name "a1"
+  supervisor TRUE
 }
 DEF a2 Salamander {
   translation 3.4 0.294 2
-  rotation 0 1 0 1.5708
+  rotation 0 1 0 1
   name "a2"
+  supervisor TRUE
 }
 DEF a3 Salamander {
   translation 3.4 0.294 -2
-  rotation 0 1 0 1.57
+  rotation 0 1 0 2.14
+  supervisor TRUE
 }
 DEF b1 Salamander {
   translation -3.4 0.294 0
   rotation 0 -1 0 1.57
   name "b1"
+  supervisor TRUE
 }
 DEF b2 Salamander {
   translation -3.4 0.294 2
-  rotation 0 -1 0 1.57
+  rotation 0 -1 0 1
   name "b2"
+  supervisor TRUE
 }
 DEF b3 Salamander {
   translation -3.4 0.294 -2
-  rotation 0 -1 0 1.57
+  rotation 0 -1 0 2.14
   name "b3"
+  supervisor TRUE
 }
 DEF FLOOR Solid {
   children [
