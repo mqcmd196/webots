@@ -110,6 +110,7 @@ void Robot::initCamera() {
   wb_camera_enable(_camera, (int)_controlStep);
 }
 
+// Enable camera recognition
 void Robot::enableRecognition() {
   _camera = wb_robot_get_device("camera");
   wb_camera_recognition_enable(_camera, (int)_controlStep);

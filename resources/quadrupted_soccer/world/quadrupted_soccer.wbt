@@ -30,7 +30,7 @@ Viewpoint {
 }
 TexturedBackground {
 }
-BioloidDogRecognition {
+DEF BIOLOID BioloidDogRecognition {
   translation 2 0 0
 }
 TexturedBackgroundLight {
