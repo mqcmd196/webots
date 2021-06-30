@@ -51,7 +51,8 @@ int main() {
   for (int c = 0; commands[c] != NULL; c++)
     printf("%s", commands[c]);
 
-  robot->interactive_walk();
+  // robot->interactive_walk();
+  robot->soccer_play();
 
   delete robot;
 

@@ -81,6 +81,7 @@ public:
   void setMotorPosition(int motorId, double value);
   double getMotorPosition(int motorId);
 
+  void soccer_play();
   void interactive_walk();
   void standing();
 

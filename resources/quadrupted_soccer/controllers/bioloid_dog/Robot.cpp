@@ -178,6 +178,187 @@ void Robot::computeWalkingPosition(double *motorsPosition, double t, double gait
   motorsPosition[1] = A2;
 }
 
+void Robot::soccer_play() {
+  int gait_type = 0, i = 0;
+  int key = -1;
+
+  bool backward = false;  // is robot walking backward
+
+  // stride length parameters
+  double slf = 1, slf_min = 0, slf_max = 1;
+  double stride_length_factor[4] = {slf, slf, slf, slf};
+
+  // frequency parameters
+  double freq_min = 0.4, freq_max = 2;
+  double freq = 1.5, freq_offset = 0.2;
+
+  // turn amount parameters
+  double ta_factor[4] = {0, 0, 0, 0};
+  double ta_min = -0.6, ta_max = 0.6;
+  double ta_offset = 0.6;
+  // double ta_min = -1, ta_max = 1;
+  // double ta_offset = 0.1;
+  // Nota: It reveals the a turn offset of 0.6 gives good result
+
+  // print red pixel for debugging
+  // _camera = wb_robot_get_device("camera");
+  const unsigned char *image = wb_camera_get_image(_camera);
+  const int image_width = wb_camera_get_width(_camera);
+  const int image_height = wb_camera_get_height(_camera);
+
+  // moving direction
+  enum {FORWARD, BACK, LEFT, RIGHT, KICK};
+  int locomotion = FORWARD;
+  
+  bool display_info = false;
+
+  WbCameraRecognitionObject rec_obj;
+  int obj_num;
+  float obj_x, obj_y, obj_z;
+  int obj_frame_x, obj_frame_y, size_on_image_x, size_on_image_y;
+
+  const int image_width_center = image_width / 2;
+  const int image_width_left_offset = image_width_center - 30;
+  const int image_width_right_offset = image_width_center + 30;
+  
+  printf("image_width: %d, image_height: %d\n", image_width, image_height);
+  
+  while (true) {
+    // get image recognition result
+    rec_obj = *wb_camera_recognition_get_objects(_camera);
+    obj_num = wb_camera_recognition_get_number_of_objects(_camera);
+    obj_x = rec_obj.position[0];
+    obj_y = rec_obj.position[1];
+    obj_z = rec_obj.position[2];
+    obj_frame_x = rec_obj.position_on_image[0];
+    obj_frame_y = rec_obj.position_on_image[1];
+    size_on_image_x = rec_obj.size_on_image[0];
+    size_on_image_y = rec_obj.size_on_image[1];
+    printf("position: %f, %f, %f\n", obj_x, obj_y, obj_z);
+    printf("position on image: %d, %d\n", rec_obj.position_on_image[0], rec_obj.position_on_image[1]);
+
+    // get keyboard
+    // const int prev_key = key;
+    const int prev_locomotion = locomotion;
+    // key = wb_keyboard_get_key();
+    
+    // not detected
+    if (obj_num == 0){
+      locomotion = LEFT;
+    }else{
+      // detected
+      if (obj_frame_x < image_width_left_offset){
+        locomotion = LEFT;
+      }else if(obj_frame_x > image_width_right_offset){
+        locomotion = RIGHT;
+      }else{
+        locomotion = FORWARD;
+      }
+    }
+
+    // not detected
+
+    // near
+    
+    if (locomotion != prev_locomotion) {
+      // update var according to 'key' value
+      switch (locomotion) {
+      case RIGHT:
+        for (i = 0; i < 4; i++) {
+          if (i == 0 || i == 3)
+            ta_factor[i] += ta_offset;
+          else
+            ta_factor[i] -= ta_offset;
+          ta_factor[i] = ta_factor[i] > ta_max ? ta_max : (ta_factor[i] < ta_min ? ta_min : ta_factor[i]);
+        }
+        display_info = true;
+        break;
+
+      case LEFT:
+        for (i = 0; i < 4; i++) {
+          if (i == 0 || i == 3)
+            ta_factor[i] -= ta_offset;
+          else
+            ta_factor[i] += ta_offset;
+          ta_factor[i] = ta_factor[i] > ta_max ? ta_max : (ta_factor[i] < ta_min ? ta_min : ta_factor[i]);
+        }
+        display_info = true;
+        break;
+
+      case FORWARD:
+        backward = false;
+        freq = 1.5;
+        display_info = true;
+        break;
+      // case 'B':
+      //   backward = true;
+      //   freq = 0.9;
+      //   display_info = true;
+      //   break;
+
+      //   // case WB_KEYBOARD_UP:
+      // case 'S':
+      //   slf += 0.1;
+      //   display_info = true;
+      //   break;
+
+      //   // case WB_KEYBOARD_DOWN:
+      // case 'A':
+      //   slf -= 0.1;
+      //   display_info = true;
+      //   break;
+
+      // case 'Q':
+      //   freq += freq_offset;
+      //   display_info = true;
+      //   break;
+
+      // case 'W':
+      //   freq -= freq_offset;
+      //   display_info = true;
+      //   break;
+      // default:
+      //   break;
+      }
+
+      // bound value
+      freq = freq > freq_max ? freq_max : (freq < freq_min ? freq_min : freq);
+      slf = slf > slf_max ? slf_max : (slf < slf_min ? slf_min : slf);
+
+      // update stride_length_factor for each leg
+      for (i = 0; i < 4; i++) {
+        stride_length_factor[i] = ta_factor[i] + slf;
+        // bound stride length
+        stride_length_factor[i] =
+          stride_length_factor[i] > slf_max ? slf_max : (stride_length_factor[i] < slf_min ? slf_min : stride_length_factor[i]);
+      }
+    }
+
+    // display walking gait informations
+    if (display_info) {
+      // display freq + turn amount
+      printf("freq:%f, slf:%f, backward:%d\n", freq, slf, backward);
+      for (i = 0; i < 4; i++)
+        printf("leg[%d] ta:%f, slf:%f \n", i, ta_factor[i], stride_length_factor[i]);
+      display_info = false;
+    }
+
+    double motorPositions[2] = {0, 0};
+    // compute motors position for each legs
+    for (int legId = 0; legId < 4; legId++) {
+      computeWalkingPosition(motorPositions, _stepCount * (_controlStep / 1000), freq, gait_type, legId,
+                             stride_length_factor[legId], backward);
+      setMotorPosition(gait_setup[legId][0], motorPositions[0]);
+      setMotorPosition(gait_setup[legId][1], motorPositions[1]);
+    }
+
+    // simulator step
+    wb_robot_step((unsigned int)_controlStep);
+    _stepCount++;
+  }
+}
+
+
 /*
  *
  */
@@ -224,7 +405,6 @@ void Robot::interactive_walk() {
 
     // get image recognition result
     const int num_rec = wb_camera_recognition_get_number_of_objects(_camera);
-    printf("%d \n", num_rec);
 
     // get keyboard
     const int prev_key = key;
